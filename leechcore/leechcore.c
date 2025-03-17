@@ -10,6 +10,7 @@
 #include "oscompatibility.h"
 #include "util.h"
 #include "version.h"
+#include <time.h> // Needed for the write logs
 
 //-----------------------------------------------------------------------------
 // Global Context and DLL Attach/Detach:
@@ -421,6 +422,20 @@ VOID LcCreate_MemMapInitAddressDetect(_Inout_ PLC_CONTEXT ctxLC)
 _Success_(return != NULL)
 EXPORTED_FUNCTION HANDLE LcCreateEx(_Inout_ PLC_CONFIG pLcCreateConfig, _Out_opt_ PPLC_CONFIG_ERRORINFO ppLcCreateErrorInfo)
 {
+    {
+        time_t now;
+        struct tm local_time;
+        char time_str[20];
+
+        // Get the current time
+        time(&now);
+        localtime_s(&local_time, &now);
+
+        // Format the time as HH:MM:SS
+        strftime(time_str, sizeof(time_str), "%H:%M:%S", &local_time);
+        printf("[%s] The Blurred.gg LeechCore Memory Writes Logger is Being Initialized...\n", time_str);
+    }
+
     PLC_CONTEXT ctxLC = NULL;
     QWORD qwExistingHandle = 0, tmStart = LcCallStart();
     if(ppLcCreateErrorInfo) { *ppLcCreateErrorInfo = NULL; }
@@ -479,6 +494,21 @@ EXPORTED_FUNCTION HANDLE LcCreateEx(_Inout_ PLC_CONFIG pLcCreateConfig, _Out_opt
     g_ctx.FLink = ctxLC;
     LeaveCriticalSection(&g_ctx.Lock);
     LcCallEnd(ctxLC, LC_STATISTICS_ID_OPEN, tmStart);
+
+    {
+        time_t now;
+        struct tm local_time;
+        char time_str[20];
+
+        // Get the current time
+        time(&now);
+        localtime_s(&local_time, &now);
+
+        // Format the time as HH:MM:SS
+        strftime(time_str, sizeof(time_str), "%H:%M:%S", &local_time);
+        printf("[%s] Successfully Initialized the Blurred.gg LeechCore Memory Writes Logger\n", time_str);
+    }
+
     return ctxLC;
 }
 
@@ -958,6 +988,40 @@ EXPORTED_FUNCTION VOID LcWriteScatter(_In_ HANDLE hLC, _In_ DWORD cMEMs, _Inout_
     if(!ctxLC || ctxLC->version != LC_CONTEXT_VERSION) { return; }
     if(!ctxLC->pfnWriteScatter && !ctxLC->pfnWriteContigious) { return; }
     if(!cMEMs) { return; }
+
+    // Printing Logs
+    {
+        time_t now;
+        struct tm local_time;
+        char time_str[20];
+
+        // Get the current time
+        time(&now);
+        localtime_s(&local_time, &now);
+
+        // Format the time as HH:MM:SS
+        strftime(time_str, sizeof(time_str), "%H:%M:%S", &local_time);
+
+        for (DWORD i = 0; i < cMEMs; i++) {
+            PMEM_SCATTER scatter = ppMEMs[i];
+
+            char buf[65] = { 0 };
+            sprintf_s(buf, sizeof(buf), "[%s] Wrote 0x%X bytes to 0x%llX\n", time_str, scatter->cb, scatter->qwA);
+            printf(buf);
+
+            // Open file in append mode
+            FILE* file = fopen("./writes.log", "a");
+
+            // If successfully opened file append the log and close it
+            if (file != NULL) {
+                fputs(buf, file);
+                fclose(file);
+            } else {
+                printf("[%s] Warning: Failed to open ./writes.log\n", time_str);
+            }
+        }
+    }
+
     if(ctxLC->Config.fRemote && ctxLC->pfnWriteScatter) {
         // REMOTE
         ctxLC->pfnWriteScatter(ctxLC, cMEMs, ppMEMs);
