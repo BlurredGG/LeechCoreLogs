@@ -7,15 +7,20 @@ LeechCoreLogs is a small fork designed to let the average person test whether an
 1. Download the modified LeechCore DLL file from [here](https://github.com/BlurredGG/LeechCoreLogs/releases/download/Latest/leechcore.dll).
 2. Find the cheat exe and then find the leechcore.dll file in the same folder and replace that with the modified one you just downloaded.
 3. Then start the cheat.
-4. You will know that it has loaded the modified LeechCore correctly when these logs appear in the terminal/console/cmd: 
-`
-[22:20:07] The Blurred.gg LeechCore Memory Writes Logger is Being Initialized...
-[22:20:09] Successfully Initialized the Blurred.gg LeechCore Memory Writes Logger
-`
+4. You will know that it has loaded the modified LeechCore correctly when these logs appear in the terminal/console/cmd:
+
+`[22:20:07] The Blurred.gg LeechCore Memory Writes Logger is Being Initialized...`
+
+`[22:20:09] Successfully Initialized the Blurred.gg LeechCore Memory Writes Logger`
+
 5. If these logs don't appear, the cheat either doesn't support LeechCore replacement or you didn't replace the DLL correctly.
 6. Now once it has loaded correctly any writes that occur will be printed to the terminal and written to the `writes.log` file in the same folder as the cheat exe. If nothing was logged then the cheat isn't doing any writes.
 
-
+<br/><br/>
+<br/><br/>
+<br/><br/>
+<br/><br/>
+ 
 The LeechCore Physical Memory Acquisition Library:
 =========================================
 The LeechCore Memory Acquisition Library focuses on Physical Memory Acquisition using various hardware and software based methods.
